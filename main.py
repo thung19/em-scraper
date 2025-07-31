@@ -1,8 +1,11 @@
-from bs4 import BeautifulSoup
-import requests
+from article_scraper import ArticleScraper
 
-url = "https://www.cnn.com/2025/07/21/politics/fema-search-and-rescue-chief-resigns"
+def main():
+    urls = ["https://www.cnn.com", "https://www.bbc.com"]
+    scraper = ArticleScraper(urls)
+    article_links = scraper.get_article_links()
+    print(article_links)
+    print("FINISHED")
 
-result = requests.get(url)
-doc = BeautifulSoup(result.text, "html.parser")
-print(doc.prettify())
+if __name__ == "__main__":
+    main()
