@@ -25,4 +25,18 @@ Beautiful Soup Scraper:
 8/6
 - Added filtration for articles that cover the same story but have different URLS
 - Think there is an issue with grabbing the content. Potentially grabs the first <p> tag which may not contain text
+- Broke down massive get_content method into smaller sub methods
+
+8/7
+- Title match does not seem to always work. It picks first <h1> tag so thats probably why
+- Filters out articles which do not have related titles. (Just to be safe)
+
+
+Ongoing issues:
+- Fix content collection method to properly record article contents
+- Fix title collection method to always record proper title
+- Get some sort of summarizer
+- Get way to email out reports
+- Get way to have this run from the cloud
+
     

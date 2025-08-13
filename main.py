@@ -1,5 +1,6 @@
 from article_scraper import ArticleScraper
 from config import ALL_URLS, BS4_URLS, NATIONAL_URLS
+from article_summarizer import summarize
 
 def main():
     
@@ -10,6 +11,9 @@ def main():
     
     results = scraper.get_content(article_links)
     scraper.print_results(results)
+    
+    summarize(results)
+
     print("FINISHED")
     
 

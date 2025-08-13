@@ -69,7 +69,8 @@ class ArticleScraper:
                     elif any(keyword in path.lower() for keyword in HOME_KEYWORDS):
                         article_links.add(full_url)
                     '''
-                print(article_links)
+                print(article_links) #for debugging
+
                 print("Links retrieved")
             except Exception as e:
                 print(f"Error during homepage scraping from {url}: {e}")
@@ -80,70 +81,111 @@ class ArticleScraper:
         results = []
         ha24 = datetime.now(timezone.utc) - timedelta(days=1)
 
+        #Loops through collected page urls and gets html
         for url in urls:
             soup = self.fetch_html(url)
+            #If unable to get html, move on to next article
             if not soup:
+                print("Skipping... Unable to retrieve URL")
                 continue
-
+            
+            #Gets date
             date = self.extract_date(soup)
-            if not isinstance(date, datetime) or date < ha24:
-                print("Skipping... invalid or too old date.")
+            #Go to next url if collected date is not of datetime object or is older than 24 hrs
+            if not isinstance(date, datetime):
+                print("Skipping... unable to get valid date object")
                 continue
 
+            if date <ha24:
+                print("Skipping... article older than 24 hours")
+                continue
+            
+            #Collects Article Title from html
             title = self.extract_title(soup)
+            #Skips article if it does not contain keywords related to emergency management
+            
+            if not any(keyword.lower() in title.lower() for keyword in EM_KEYWORDS):
+                print("Skipping... Title not relevant")
+                continue
+            
+            
+            #Collects actual content of article from html
             content = self.extract_content(soup)
 
+            #If no content is retrieved, go to next article
             if not content.strip():
                 print("Skipping... content is empty.")
                 continue
-
+            
+            #Create dictionary containing article attributes
             new_article = {"url": url, "title": title, "date": date, "content": content}
+
+            #Filters out articles that are different but cover similar story
             self.deduplicate(results, new_article)
 
         return results
 
+    #Gets article html
     def fetch_html(self, url):
+        #Tries to get article html
         try:
             response = self.session.get(url, headers=HEADERS, timeout=20)
             response.raise_for_status()
+            #Parses html
             return BeautifulSoup(response.text, 'lxml')
         except Exception as e:
             print(f"Failed to fetch HTML from {url}: {e}")
             return None
 
+    #Gets article publication date
     def extract_date(self, soup):
+        #Loops through common date attributes and finds the meta tag that matches one of those attributes
         try:
             for attrs in DATE_ATTRS:
                 meta_date = soup.find("meta", attrs=attrs)
+                #Returns if tag has a content field
                 if meta_date and meta_date.get("content"):
                     return self.parse_date(meta_date["content"])
         except Exception as e:
             print(f"Date parsing error: {e}")
 
         try:
+            #Searches for a time tag and gets content
             time_tag = soup.find("time", attrs={"datetime": True})
-            if time_tag:
+            if time_tag and time_tag.get("datetime"):
                 return self.parse_date(time_tag["datetime"])
         except Exception as e:
             print(f"time fallback failed: {e}")
 
         return None
 
+      
+    #Converts HTML date string into python datetime object
     def parse_date(self, date_str):
         try:
+            #Finds strings that end with Z and converts to understandable format
             if date_str.endswith("Z"):
                 dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
             else:
                 dt = datetime.fromisoformat(date_str)
+            #Ensure datetime object has timezone
             return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
         except Exception as e:
             print(f"Date parsing failed for {date_str}: {e}")
             return None
 
+    #Gets title of article
     def extract_title(self, soup):
+        #Finds h1 tag and returns content within
         try:
-            title_tag = soup.find("h1")
-            return title_tag.text.strip() if title_tag else ""
+            h1 = soup.find("h1")
+            if h1 and h1.get_text(strip=True):
+                return h1.get_text(strip=True)
+            
+            og_title = soup.find("meta", property="og:title")
+            if og_title and og_title.get("content"):
+                return og_title["content"].strip()
+            
         except Exception as e:
             print(f"Title parsing failed: {e}")
             return ""
@@ -151,11 +193,13 @@ class ArticleScraper:
     def extract_content(self, soup):
         try:
             body = None
+            #Loops through common class name patterns and searches for a div tag that has a class that matches
             for cls in POSSIBLE_CLASSES:
                 body = soup.find("div", class_=re.compile(cls, re.IGNORECASE))
                 if body:
                     break
-
+            
+            #If no div tag is found, looks for first non-empty p tag and assumes it to be article body
             if not body:
                 for div in soup.find_all("div"):
                     ps = div.find_all("p")
@@ -163,6 +207,7 @@ class ArticleScraper:
                         body = div
                         break
 
+            #Extracts p tags if valid body elements were found              
             if body:
                 paragraphs = body.find_all("p")
             else:
@@ -171,6 +216,7 @@ class ArticleScraper:
 
             content = '\n\n'.join(p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True))
 
+            #If nothing is found, try to use common og description as article body
             if not content.strip():
                 og_desc = soup.find("meta", property="og:description")
                 if og_desc and og_desc.get("content"):
@@ -192,14 +238,17 @@ class ArticleScraper:
 
 
 
-    
+    #Uses Spacy natural language processing to determine similarity of two article titles
     def calc_sim_titles (self, title1, title2, threshold=0.75):
         w1 = self.nlp(title1)
         w2 = self.nlp(title2)
         similarity = w1.similarity(w2)
         return similarity >= threshold
     
+    #Prints article results
     def print_results(self, results):
+        print("")
+        print("Article Results")
         for article in results:
             print(article["title"])
             print(article["date"])

@@ -13,9 +13,11 @@ REGEX_PATTERNS = [
 HOME_KEYWORDS = ["news", "article", "articles", "stories", "story", "press", "releases" ]
 
 EM_KEYWORDS = [
-    "FEMA", "NJEMA", "earthquake", "storm", "flood",
-    "shooting", "bomb", "hospital", "disaster",
-    "Federal Emergency Management Agency", "CDC", "Centers for Disease Control and Prevention"
+    "FEMA", "NJEMA", "Federal Emergency Management Agency", "CDC", "Centers for Disease Control and Prevention",
+    "earthquake", "storm", "flood", "fire", "disaster",
+    "shooting", "bomb", "explosion", 
+    "terrorism", "terrorist"
+    "hospital", 
 ]
 
 POSSIBLE_CLASSES = [
@@ -39,7 +41,7 @@ DATE_ATTRS = [{"property": "article:published_time"},
      "property": "og:updated_time"}
 ]
 
-BS4_URLS = ["https://www.cnn.com", 
+BS4_URLS = ["https://www.cnn.com/us", 
             "https://www.bbc.com", 
             "https://apnews.com/us-news", 
             "https://www.nbcnews.com/us-news",
@@ -47,7 +49,7 @@ BS4_URLS = ["https://www.cnn.com",
             "https://www.nj.com/healthfit/",
             "https://www.nj.com/"]
 
-NATIONAL_URLS = ["https://www.cnn.com", 
+NATIONAL_URLS = ["https://www.cnn.com/us", 
             "https://www.bbc.com", 
             "https://apnews.com/us-news", 
             "https://www.nbcnews.com/us-news",
@@ -62,7 +64,7 @@ GOV_URLS = ["https://www.fema.gov/about/news-multimedia/press-releases"
 
 ]
 
-ALL_URLS = ["https://www.cnn.com", 
+ALL_URLS = ["https://www.cnn.com/us", 
             "https://www.bbc.com", 
             "https://apnews.com/us-news", 
             "https://www.fema.gov/about/news-multimedia/press-releases", 
