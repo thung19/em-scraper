@@ -54,6 +54,7 @@ class ArticleScraper:
                     #print(path) #For testing
 
                     #Filters through all URLS and only adds ones that match with common article regex patterns and have a keyword related to emergency management
+                    '''
                     if (any(re.match(pattern, path) for pattern in REGEX_PATTERNS)) and \
                        any(keyword.lower() in path.lower() for keyword in EM_KEYWORDS):
                         article_links.add(full_url)
@@ -61,7 +62,10 @@ class ArticleScraper:
                     elif any(keyword in path.lower() for keyword in HOME_KEYWORDS) and \
                          any(keyword.lower() in path.lower() for keyword in EM_KEYWORDS):
                         article_links.add(full_url)
-                    
+                    '''
+                    article_links.add(full_url)
+                        
+
                     '''
                     if (any(re.match(pattern, path) for pattern in REGEX_PATTERNS)):
                         article_links.add(full_url)
@@ -69,7 +73,7 @@ class ArticleScraper:
                     elif any(keyword in path.lower() for keyword in HOME_KEYWORDS):
                         article_links.add(full_url)
                     '''
-                print(article_links) #for debugging
+                #print(article_links) #for debugging
 
                 print("Links retrieved")
             except Exception as e:
@@ -115,6 +119,11 @@ class ArticleScraper:
             #If no content is retrieved, go to next article
             if not content.strip():
                 print("Skipping... content is empty.")
+                continue
+            
+            #If  content is less than 100 chars, go to next article
+            if len(content) < 100:
+                print("Skipping... content is too little")
                 continue
             
             #Create dictionary containing article attributes
@@ -221,7 +230,7 @@ class ArticleScraper:
                 og_desc = soup.find("meta", property="og:description")
                 if og_desc and og_desc.get("content"):
                     print("Used og:description as fallback content.")
-                    return og_desc["content"].strip()
+                    content = og_desc["content"].strip()
 
             return content
         except Exception as e:

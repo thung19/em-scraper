@@ -31,6 +31,12 @@ Beautiful Soup Scraper:
 - Title match does not seem to always work. It picks first <h1> tag so thats probably why
 - Filters out articles which do not have related titles. (Just to be safe)
 
+8/11
+- Worked on using bart-large-cnn transformer to summarize articles
+- Somewhat works but nto in love with summary methods
+    - Senteneces do not flow well together at times
+    - Can be awkward in terms of grammar
+
 
 Ongoing issues:
 - Fix content collection method to properly record article contents

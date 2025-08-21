@@ -29,10 +29,11 @@ def summarize(article_attributes):
         else:
             combined_summary = summarizer(content, max_length=200, min_length=80, do_sample=False)[0]['summary_text']
 
+        '''
         print(f"Title: {title}")
         print(f"URL: {url}")
         print(f"Date: {date}")
         print()
         print("Summary")
         print(f"{combined_summary}\n")
-     
+        '''
